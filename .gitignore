@@ -1,0 +1,66 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java/Kotlin class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+
+# Gradle files
+.gradle/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# Navigation editor temp files
+.navigation/
+
+# Android captures
+captures/
+
+# External native build
+.externalNativeBuild/
+.cxx/
+
+# Google Services
+google-services.json
+
+# Firebase Crashlytics
+com_crashlytics_export_strings.xml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Kotlin
+.kotlin/
+
+# IntelliJ
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Temporary files
+*.tmp
+*.temp
