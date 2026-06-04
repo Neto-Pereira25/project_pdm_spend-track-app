@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.spendtrackapp.ui.theme.SpendTrackAppTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +53,7 @@ fun HomePage(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
+                Firebase.auth.signOut()
                 activity.finish()
             }
         ) {
