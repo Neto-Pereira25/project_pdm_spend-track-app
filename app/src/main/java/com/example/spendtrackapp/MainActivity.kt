@@ -54,7 +54,6 @@ fun HomePage(modifier: Modifier = Modifier) {
         Button(
             onClick = {
                 Firebase.auth.signOut()
-                activity.finish()
             }
         ) {
             Text("Sair")
