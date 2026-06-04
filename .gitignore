@@ -64,3 +64,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# google-services.json
+google-services.json
