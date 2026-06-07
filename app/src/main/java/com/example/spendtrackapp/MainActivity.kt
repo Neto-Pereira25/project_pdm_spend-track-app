@@ -1,6 +1,5 @@
 package com.example.spendtrackapp
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,12 +17,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.spendtrackapp.ui.ExpenseDialog
 import com.example.spendtrackapp.ui.nav.BottomNavBar
 import com.example.spendtrackapp.ui.nav.BottomNavItem
 import com.example.spendtrackapp.ui.nav.MainNavHost
+import com.example.spendtrackapp.ui.nav.Routes
 import com.example.spendtrackapp.ui.theme.SpendTrackAppTheme
+import com.example.spendtrackapp.viewmodel.MainViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -35,8 +44,28 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val viewModel: MainViewModel = viewModel()
+
+            var showDialog by remember { mutableStateOf(false) }
+
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+
+            val showFab = currentDestination?.hierarchy?.any {
+                it.route == Routes.LIST
+            } == true
 
             SpendTrackAppTheme {
+                if (showDialog) {
+                    ExpenseDialog(
+                        onDismiss = { showDialog = false },
+                        onConfirm = { description, amount, category ->
+                            viewModel.add(description, amount, category)
+                            showDialog = false
+                        }
+                    )
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -62,31 +91,36 @@ class MainActivity : ComponentActivity() {
                             BottomNavItem.List,
                             BottomNavItem.Map
                         )
+
                         BottomNavBar(
                             navController = navController,
                             items = items
                         )
                     },
                     floatingActionButton = {
-                        FloatingActionButton(
-                            onClick = {
-                                // por enquanto sem ação
+                        if (showFab) {
+                            FloatingActionButton(
+                                onClick = { showDialog = true }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Adicionar gasto"
+                                )
                             }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Adicionar"
-                            )
                         }
                     }
                 ) { innerPadding ->
                     Box(
                         modifier = Modifier.padding(innerPadding)
                     ) {
-                        MainNavHost(navController = navController)
+                        MainNavHost(
+                            navController = navController,
+                            viewModel = viewModel
+                        )
                     }
                 }
             }
         }
     }
 }
+
