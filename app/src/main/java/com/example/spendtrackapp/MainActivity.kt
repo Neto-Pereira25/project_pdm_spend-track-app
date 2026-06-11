@@ -1,6 +1,8 @@
 package com.example.spendtrackapp
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.spendtrackapp.db.fb.FBDatabase
 import com.example.spendtrackapp.ui.ExpenseDialog
 import com.example.spendtrackapp.ui.nav.BottomNavBar
 import com.example.spendtrackapp.ui.nav.BottomNavItem
@@ -33,18 +36,28 @@ import com.example.spendtrackapp.ui.nav.MainNavHost
 import com.example.spendtrackapp.ui.nav.Routes
 import com.example.spendtrackapp.ui.theme.SpendTrackAppTheme
 import com.example.spendtrackapp.viewmodel.MainViewModel
+import com.example.spendtrackapp.viewmodel.MainViewModelFactory
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        private const val TAG = "SpendTrackExpense"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
+
             val navController = rememberNavController()
-            val viewModel: MainViewModel = viewModel()
+            val fbDB = remember { FBDatabase() }
+            val viewModel: MainViewModel = viewModel(
+                factory = MainViewModelFactory(fbDB)
+            )
 
             var showDialog by remember { mutableStateOf(false) }
 
@@ -55,16 +68,34 @@ class MainActivity : ComponentActivity() {
                 it.route == Routes.LIST
             } == true
 
+
             SpendTrackAppTheme {
                 if (showDialog) {
                     ExpenseDialog(
                         onDismiss = { showDialog = false },
                         onConfirm = { description, amount, category ->
-                            viewModel.add(description, amount, category)
-                            showDialog = false
+                            Log.d(TAG, "Expense dialog confirmed: description='$description', amount=$amount, category='$category'")
+                            viewModel.add(
+                                description = description,
+                                amount = amount,
+                                category = category,
+                                onSuccess = {
+                                    Log.d(TAG, "Expense save completed successfully")
+                                    showDialog = false
+                                },
+                                onFailure = { ex ->
+                                    Log.e(TAG, "Expense save failed", ex)
+                                    Toast.makeText(
+                                        this,
+                                        "Falha ao salvar gasto no Firestore: ${ex.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            )
                         }
                     )
                 }
+
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -109,10 +140,9 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
+                )
+                { innerPadding ->
+                    Box(modifier = Modifier.padding(innerPadding)) {
                         MainNavHost(
                             navController = navController,
                             viewModel = viewModel

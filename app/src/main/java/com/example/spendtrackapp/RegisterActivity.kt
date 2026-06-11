@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.spendtrackapp.db.fb.FBDatabase
 import com.example.spendtrackapp.ui.theme.SpendTrackAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -116,9 +117,27 @@ fun RegisterPage(modifier: Modifier = Modifier) {
                 Firebase.auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(activity) { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(activity, "Registro OK!", Toast.LENGTH_LONG).show()
+                            FBDatabase().registerUser(
+                                name = name,
+                                email = email,
+                                onSuccess = {
+                                    Toast.makeText(activity, "Usuario salvo no Firestore!", Toast.LENGTH_LONG).show()
+                                },
+                                onFailure = { ex ->
+                                    Firebase.auth.signOut()
+                                    Toast.makeText(
+                                        activity,
+                                        "Conta criada, mas falhou salvar no Firestore: ${ex.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            )
                         } else {
-                            Toast.makeText(activity, "Registro FALHOU!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                activity,
+                                "Registro FALHOU: ${task.exception?.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
             },
