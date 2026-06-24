@@ -31,6 +31,8 @@ class MainViewModel(
         description: String,
         amount: Double,
         category: String,
+        lat: Double? = null,
+        lng: Double? = null,
         onSuccess: (() -> Unit)? = null,
         onFailure: ((Exception) -> Unit)? = null
     ) {
@@ -38,10 +40,10 @@ class MainViewModel(
             id = System.currentTimeMillis().toString(),
             description = description,
             amount = amount,
-            category = category
+            category = category,
+            lat = lat,
+            lng = lng
         )
-
-        Log.d(TAG, "ViewModel created expense: $expense")
 
         db.add(
             expense = expense.toFBExpense(),
