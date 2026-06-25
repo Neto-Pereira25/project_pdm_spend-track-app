@@ -54,6 +54,13 @@ fun ExpenseItem(
                 text = "Valor: R$ %.2f".format(expense.amount),
                 fontSize = 14.sp
             )
+
+            if (expense.lat != null && expense.lng != null) {
+                Text(
+                    text = "Localização: %.4f, %.4f".format(expense.lat, expense.lng),
+                    fontSize = 12.sp
+                )
+            }
         }
 
         IconButton(onClick = onClose) {

@@ -1,39 +1,66 @@
 package com.example.spendtrackapp.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
 import com.example.spendtrackapp.viewmodel.MainViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+
 
 @Composable
 fun MapPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xFF616161)),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Mapa",
-            fontSize = 24.sp,
-            color = Color.White
-        )
+    val expenses = viewModel.expenses
 
-        Text(
-            text = "Em breve: ${viewModel.totalItems()} gastos no mapa",
-            color = Color.White
-        )
+    val firstLocation = expenses.firstOrNull { it.lat != null && it.lng != null }
+
+    val cameraPositionState = rememberCameraPositionState {
+        if (firstLocation != null) {
+            position = CameraPosition.fromLatLngZoom(
+                LatLng(firstLocation.lat!!, firstLocation.lng!!),
+                15f
+            )
+        }
+    }
+
+    LaunchedEffect(expenses.size) {
+        val latestLocation = expenses.lastOrNull { it.lat != null && it.lng != null }
+        if (latestLocation != null) {
+            try {
+                val latLng = LatLng(latestLocation.lat!!, latestLocation.lng!!)
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngZoom(latLng, 15f),
+                    durationMs = 1000
+                )
+            } catch (e: Exception) {
+                // Ignorar erros de animação
+            }
+        }
+    }
+
+    GoogleMap(
+        modifier = modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    ) {
+        expenses.forEach { expense ->
+            if (expense.lat != null && expense.lng != null) {
+                val position = LatLng(expense.lat, expense.lng)
+
+                Marker(
+                    state = MarkerState(position = position),
+                    title = expense.description,
+                    snippet = "R$ %.2f - ${expense.category}".format(expense.amount)
+                )
+            }
+        }
     }
 }
-

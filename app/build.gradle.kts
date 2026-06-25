@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -61,6 +62,10 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.firebase.firestore)
+
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.maps.android:maps-compose:8.3.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
