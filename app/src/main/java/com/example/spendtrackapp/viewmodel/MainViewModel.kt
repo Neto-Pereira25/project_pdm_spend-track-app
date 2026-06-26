@@ -8,7 +8,7 @@ import com.example.spendtrackapp.db.fb.FBExpense
 import com.example.spendtrackapp.db.fb.toFBExpense
 import com.example.spendtrackapp.model.Expense
 import android.util.Log
-
+import com.example.spendtrackapp.db.fb.FBSettings
 
 class MainViewModel(
     private val db: FBDatabase
@@ -19,9 +19,13 @@ class MainViewModel(
     }
 
     private val _expenses = mutableStateListOf<Expense>()
+    private var _monthlyGoal = androidx.compose.runtime.mutableStateOf(0.0)
 
     val expenses: List<Expense>
         get() = _expenses.toList()
+
+    val monthlyGoal: Double
+        get() = _monthlyGoal.value
 
     init {
         db.setListener(this)
@@ -76,6 +80,18 @@ class MainViewModel(
         return _expenses.find { it.id == id }
     }
 
+    fun saveMonthlyGoal(
+        monthlyGoal: Double,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        db.saveMonthlyGoal(
+            monthlyGoal = monthlyGoal,
+            onSuccess = onSuccess,
+            onFailure = onFailure
+        )
+    }
+
     override fun onExpenseAdded(expense: FBExpense) {
         val converted = expense.toExpense()
         Log.d(TAG, "Snapshot added expense received: $converted")
@@ -95,13 +111,22 @@ class MainViewModel(
 
     override fun onExpenseRemoved(expense: FBExpense) {
         val converted = expense.toExpense()
+
         Log.d(TAG, "Snapshot removed expense received: $converted")
+
         _expenses.removeAll { it.id == converted.id }
     }
 
     override fun onUserSignOut() {
         Log.d(TAG, "Auth sign-out detected, clearing local expenses list")
+
         _expenses.clear()
+        _monthlyGoal.value = 0.0
+
+    }
+
+    override fun onSettingsLoaded(settings: FBSettings) {
+        _monthlyGoal.value = settings.monthlyGoal ?: 0.0
     }
 }
 
