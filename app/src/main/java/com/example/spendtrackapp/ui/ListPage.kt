@@ -1,8 +1,5 @@
 package com.example.spendtrackapp.ui
 
-import android.app.Activity
-import android.widget.Toast
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,10 +12,10 @@ import com.example.spendtrackapp.viewmodel.MainViewModel
 @Composable
 fun ListPage(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    onExpenseClick: (String) -> Unit
 ) {
     val expenseList = viewModel.expenses
-    val activity = LocalActivity.current as Activity
 
     LazyColumn(
         modifier = modifier
@@ -29,11 +26,7 @@ fun ListPage(
             ExpenseItem(
                 expense = expense,
                 onClick = {
-                    Toast.makeText(
-                        activity,
-                        "${expense.description} - R$ %.2f".format(expense.amount),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    onExpenseClick(expense.id)
                 },
                 onClose = {
                     viewModel.remove(expense)
@@ -42,4 +35,3 @@ fun ListPage(
         }
     }
 }
-
