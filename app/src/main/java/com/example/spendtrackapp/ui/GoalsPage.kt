@@ -46,12 +46,12 @@ fun GoalsPage(
     val totalSpent = viewModel.totalSpent()
     val monthlyGoal = viewModel.monthlyGoal
     val remaining = monthlyGoal - totalSpent
-
     val progress = if (monthlyGoal > 0.0) {
-        (totalSpent / monthlyGoal).toFloat().coerceIn(0f, 1f)
+        viewModel.goalUsagePercent().toFloat().coerceIn(0f, 1f)
     } else {
         0f
     }
+
 
     Column(
         modifier = modifier
@@ -128,16 +128,31 @@ fun GoalsPage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+
+        val remainingText = if (remaining >= 0.0) {
+            "Restante: R$ %.2f".format(remaining)
+        } else {
+            "Meta ultrapassada em: R$ %.2f".format(kotlin.math.abs(remaining))
+        }
+
         Text(
-            text = "Restante: R$ %.2f".format(remaining),
+            text = remainingText,
             fontSize = 18.sp
         )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        GoalAlertCard(
+            message = viewModel.goalStatusMessage(),
+            level = viewModel.goalStatusLevel()
         )
     }
 }

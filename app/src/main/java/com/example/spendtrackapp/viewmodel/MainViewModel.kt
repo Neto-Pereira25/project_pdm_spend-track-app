@@ -128,6 +128,48 @@ class MainViewModel(
     override fun onSettingsLoaded(settings: FBSettings) {
         _monthlyGoal.value = settings.monthlyGoal ?: 0.0
     }
+
+    // Métodos auxiliares para meta de gastos mensais
+    fun goalUsagePercent(): Double {
+        if (monthlyGoal <= 0.0) return 0.0
+        return totalSpent() / monthlyGoal
+    }
+
+    fun remainingAmount(): Double {
+        return monthlyGoal - totalSpent()
+    }
+
+    fun goalStatusMessage(): String {
+        if (monthlyGoal <= 0.0) {
+            return "Nenhuma meta mensal definida."
+        }
+
+        val percent = goalUsagePercent()
+
+        return when {
+            percent >= 1.0 -> {
+                "Atenção: você ultrapassou sua meta mensal."
+            }
+            percent >= 0.8 -> {
+                "Atenção: você já atingiu 80% da sua meta mensal."
+            }
+            else -> {
+                "Seus gastos estão dentro da meta."
+            }
+        }
+    }
+
+    fun goalStatusLevel(): Int {
+        if (monthlyGoal <= 0.0) return 0
+
+        val percent = goalUsagePercent()
+
+        return when {
+            percent >= 1.0 -> 3
+            percent >= 0.8 -> 2
+            else -> 1
+        }
+    }
 }
 
 class MainViewModelFactory(
