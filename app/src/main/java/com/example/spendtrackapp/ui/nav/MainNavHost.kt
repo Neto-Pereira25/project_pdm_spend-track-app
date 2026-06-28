@@ -14,6 +14,7 @@ import com.example.spendtrackapp.ui.ListPage
 import com.example.spendtrackapp.ui.MapPage
 import com.example.spendtrackapp.viewmodel.MainViewModel
 import com.example.spendtrackapp.ui.GoalsPage
+import com.example.spendtrackapp.ui.SettingsPage
 
 @Composable
 fun MainNavHost(
@@ -53,6 +54,12 @@ fun MainNavHost(
             GoalsPage(
                 modifier = modifier,
                 viewModel = viewModel
+            )
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsPage(
+                modifier = modifier
             )
         }
 

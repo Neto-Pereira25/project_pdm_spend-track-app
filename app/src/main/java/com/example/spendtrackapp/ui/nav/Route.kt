@@ -13,6 +13,7 @@ object Routes {
     const val MAP = "map"
     const val DETAIL = "detail"
     const val GOALS = "goals"
+    const val SETTINGS = "settings"
 }
 
 sealed class BottomNavItem(

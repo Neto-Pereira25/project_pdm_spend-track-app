@@ -40,12 +40,13 @@ fun BottomNavBar(
                 },
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (currentDestination?.route != item.route) {
+                        navController.navigate(item.route) {
+                            popUpTo(Routes.HOME) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
