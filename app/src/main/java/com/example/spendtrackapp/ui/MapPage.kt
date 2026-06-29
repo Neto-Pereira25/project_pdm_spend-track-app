@@ -1,66 +1,72 @@
 package com.example.spendtrackapp.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.example.spendtrackapp.viewmodel.MainViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-
 @Composable
 fun MapPage(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    onMapClick: (LatLng) -> Unit
 ) {
-    val expenses = viewModel.expenses
+    val context = LocalContext.current
 
-    val firstLocation = expenses.firstOrNull { it.lat != null && it.lng != null }
+    val hasLocationPermission = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
 
-    val cameraPositionState = rememberCameraPositionState {
-        if (firstLocation != null) {
-            position = CameraPosition.fromLatLngZoom(
-                LatLng(firstLocation.lat!!, firstLocation.lng!!),
-                15f
+    val clusters = viewModel.collectivePriceClusters()
+    val cameraPositionState = rememberCameraPositionState()
+
+    val firstCluster = clusters.firstOrNull()
+
+    LaunchedEffect(firstCluster) {
+        if (firstCluster != null) {
+            val position = LatLng(firstCluster.lat, firstCluster.lng)
+            cameraPositionState.move(
+                CameraUpdateFactory.newLatLngZoom(position, 15f)
             )
-        }
-    }
-
-    LaunchedEffect(expenses.size) {
-        val latestLocation = expenses.lastOrNull { it.lat != null && it.lng != null }
-        if (latestLocation != null) {
-            try {
-                val latLng = LatLng(latestLocation.lat!!, latestLocation.lng!!)
-                cameraPositionState.animate(
-                    CameraUpdateFactory.newLatLngZoom(latLng, 15f),
-                    durationMs = 1000
-                )
-            } catch (e: Exception) {
-                // Ignorar erros de animação
-            }
         }
     }
 
     GoogleMap(
         modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(
+            isMyLocationEnabled = hasLocationPermission
+        ),
+        uiSettings = MapUiSettings(
+            myLocationButtonEnabled = hasLocationPermission,
+            zoomControlsEnabled = true
+        ),
+        onMapClick = { latLng ->
+            onMapClick(latLng)
+        }
     ) {
-        expenses.forEach { expense ->
-            if (expense.lat != null && expense.lng != null) {
-                val position = LatLng(expense.lat, expense.lng)
+        clusters.forEach { cluster ->
+            val position = LatLng(cluster.lat, cluster.lng)
 
-                Marker(
-                    state = MarkerState(position = position),
-                    title = expense.description,
-                    snippet = "R$ %.2f - ${expense.category}".format(expense.amount)
-                )
-            }
+            Marker(
+                state = MarkerState(position = position),
+                title = "Preço médio: R$ %.2f".format(cluster.averageAmount),
+                snippet = "${cluster.count} registro(s) próximos • Categoria: ${cluster.mainCategory}"
+            )
         }
     }
 }
