@@ -31,26 +31,45 @@ import androidx.activity.compose.LocalActivity
 @Composable
 fun ExpenseDialog(
     onDismiss: () -> Unit,
-    onConfirm: (description: String, amount: Double, category: String) -> Unit
+    onConfirm: (description: String, amount: Double, category: String) -> Unit,
+    title: String = "Adicionar gasto",
+    confirmButtonText: String = "Salvar",
+    initialDescription: String = "",
+    initialAmount: String = "",
+    initialCategory: String = ""
 ) {
-    val description = remember { mutableStateOf("") }
-    val amount = remember { mutableStateOf("") }
-    val category = remember { mutableStateOf("") }
+    val description = remember(initialDescription) {
+        mutableStateOf(initialDescription)
+    }
+
+    val amount = remember(initialAmount) {
+        mutableStateOf(initialAmount)
+    }
+
+    val category = remember(initialCategory) {
+        mutableStateOf(initialCategory)
+    }
+
     val activity = LocalActivity.current
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Surface {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(
+                modifier = Modifier.padding(20.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Adicionar gasto")
+                    Text(text = title)
+
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Fechar",
-                        modifier = Modifier.clickable { onDismiss() }
+                        modifier = Modifier.clickable {
+                            onDismiss()
+                        }
                     )
                 }
 
@@ -60,7 +79,9 @@ fun ExpenseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Descrição") },
                     value = description.value,
-                    onValueChange = { description.value = it }
+                    onValueChange = {
+                        description.value = it
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -69,8 +90,12 @@ fun ExpenseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Valor") },
                     value = amount.value,
-                    onValueChange = { amount.value = it },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    onValueChange = {
+                        amount.value = it
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -79,14 +104,18 @@ fun ExpenseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Categoria") },
                     value = category.value,
-                    onValueChange = { category.value = it }
+                    onValueChange = {
+                        category.value = it
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = {
-                        val expenseAmount = amount.value.replace(",", ".").toDoubleOrNull()
+                        val expenseAmount = amount.value
+                            .replace(",", ".")
+                            .toDoubleOrNull()
 
                         if (
                             description.value.isNotBlank() &&
@@ -106,13 +135,12 @@ fun ExpenseDialog(
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
                 ) {
-                    Text("Salvar")
+                    Text(confirmButtonText)
                 }
             }
         }

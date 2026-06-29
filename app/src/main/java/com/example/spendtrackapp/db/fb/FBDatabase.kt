@@ -200,6 +200,67 @@ class FBDatabase {
             }
     }
 
+    fun update(
+        expense: FBExpense,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        if (auth.currentUser == null)
+            throw RuntimeException("User not logged in!")
+
+        if (expense.id.isNullOrBlank())
+            throw RuntimeException("Expense with null or empty id!")
+
+        val uid = auth.currentUser!!.uid
+        val privateExpenseId = expense.id!!
+        val publicEntryId = "${uid}_$privateExpenseId"
+
+        val privateExpenseRef = db.collection("users")
+            .document(uid)
+            .collection("expenses")
+            .document(privateExpenseId)
+
+        privateExpenseRef
+            .set(expense)
+            .addOnSuccessListener {
+
+                if (expense.lat != null && expense.lng != null) {
+                    val publicEntry = FBPublicPriceEntry().apply {
+                        id = publicEntryId
+                        this.privateExpenseId = privateExpenseId
+                        amount = expense.amount
+                        category = expense.category
+                        lat = expense.lat
+                        lng = expense.lng
+                        ownerUid = uid
+                    }
+
+                    db.collection("public_price_entries")
+                        .document(publicEntryId)
+                        .set(publicEntry)
+                        .addOnSuccessListener {
+                            onSuccess?.invoke()
+                        }
+                        .addOnFailureListener { ex ->
+                            onFailure?.invoke(ex)
+                        }
+                } else {
+                    db.collection("public_price_entries")
+                        .document(publicEntryId)
+                        .delete()
+                        .addOnSuccessListener {
+                            onSuccess?.invoke()
+                        }
+                        .addOnFailureListener { ex ->
+                            onFailure?.invoke(ex)
+                        }
+                }
+            }
+            .addOnFailureListener { ex ->
+                onFailure?.invoke(ex)
+            }
+    }
+
     fun remove(
         expense: FBExpense,
         onSuccess: (() -> Unit)? = null,
