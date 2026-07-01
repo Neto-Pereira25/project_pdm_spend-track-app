@@ -1,6 +1,7 @@
 package com.example.spendtrackapp.ui.nav
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
@@ -11,6 +12,7 @@ object Routes {
     const val LIST = "list"
     const val MAP = "map"
     const val DETAIL = "detail"
+    const val GOALS = "goals"
 }
 
 sealed class BottomNavItem(
@@ -34,5 +36,11 @@ sealed class BottomNavItem(
         title = "Mapa",
         icon = Icons.Default.LocationOn,
         route = Routes.MAP
+    )
+
+    object Goals : BottomNavItem(
+        title = "Metas",
+        icon = Icons.Default.Flag,
+        route = Routes.GOALS
     )
 }

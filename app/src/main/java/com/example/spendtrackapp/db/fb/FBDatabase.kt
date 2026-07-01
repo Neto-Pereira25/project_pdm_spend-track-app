@@ -17,6 +17,7 @@ class FBDatabase {
         fun onExpenseAdded(expense: FBExpense)
         fun onExpenseUpdated(expense: FBExpense)
         fun onExpenseRemoved(expense: FBExpense)
+        fun onSettingsLoaded(settings: FBSettings)
         fun onUserSignOut()
     }
 
@@ -24,14 +25,18 @@ class FBDatabase {
     private val db = Firebase.firestore
 
     private var expensesListReg: ListenerRegistration? = null
+    private var settingsReg: ListenerRegistration? = null
     private var listener: Listener? = null
 
     init {
         auth.addAuthStateListener { auth ->
             Log.d(TAG, "Auth state changed. currentUser=${auth.currentUser?.uid}")
+
             if (auth.currentUser == null) {
                 Log.d(TAG, "No authenticated user. Removing expense listener if present")
+
                 expensesListReg?.remove()
+                settingsReg?.remove()
                 listener?.onUserSignOut()
                 return@addAuthStateListener
             }
@@ -39,9 +44,12 @@ class FBDatabase {
             val refCurrUser = db.collection("users").document(auth.currentUser!!.uid)
             Log.d(TAG, "Attaching expenses snapshot listener to ${refCurrUser.path}/expenses")
 
-            expensesListReg = refCurrUser.collection("expenses")
+            expensesListReg = refCurrUser
+                .collection("expenses")
                 .addSnapshotListener { snapshots, ex ->
-                    if (ex != null) return@addSnapshotListener
+                    if (ex != null) {
+                        return@addSnapshotListener
+                    }
 
                     if (snapshots == null) {
                         Log.d(TAG, "Expense snapshot returned null for user ${auth.currentUser!!.uid}")
@@ -65,6 +73,17 @@ class FBDatabase {
                         } else if (change.type == DocumentChange.Type.REMOVED) {
                             listener?.onExpenseRemoved(fbExpense)
                         }
+                    }
+                }
+
+            settingsReg = refCurrUser
+                .collection("settings")
+                .document("main")
+                .addSnapshotListener { snapshot, ex ->
+                    if (ex != null) return@addSnapshotListener
+
+                    snapshot?.toObject(FBSettings::class.java)?.let { settings ->
+                        listener?.onSettingsLoaded(settings)
                     }
                 }
         }
@@ -161,5 +180,28 @@ class FBDatabase {
                 Log.e(TAG, "Expense remove failed at ${documentRef.path}", ex)
                 onFailure?.invoke(ex)
             }
+    }
+
+    fun saveMonthlyGoal(
+        monthlyGoal: Double,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        if (auth.currentUser == null)
+            throw RuntimeException("User not logged in!")
+
+        val uid = auth.currentUser!!.uid
+
+        val settings = FBSettings().apply {
+            this.monthlyGoal = monthlyGoal
+        }
+
+        db.collection("users")
+            .document(uid)
+            .collection("settings")
+            .document("main")
+            .set(settings)
+            .addOnSuccessListener { onSuccess?.invoke() }
+            .addOnFailureListener { ex -> onFailure?.invoke(ex) }
     }
 }
