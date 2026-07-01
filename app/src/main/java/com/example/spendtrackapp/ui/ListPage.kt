@@ -27,6 +27,7 @@ fun ListPage(
                 expense = expense,
                 onClick = {
                     onExpenseClick(expense.id)
+                    onExpenseClick(expense.id)
                 },
                 onClose = {
                     viewModel.remove(expense)

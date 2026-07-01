@@ -52,6 +52,7 @@ fun GoalsPage(
         0f
     }
 
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -127,6 +128,7 @@ fun GoalsPage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+
         val remainingText = if (remaining >= 0.0) {
             "Restante: R$ %.2f".format(remaining)
         } else {
@@ -137,6 +139,7 @@ fun GoalsPage(
             text = remainingText,
             fontSize = 18.sp
         )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 

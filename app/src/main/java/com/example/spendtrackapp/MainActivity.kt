@@ -52,6 +52,7 @@ import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import androidx.compose.material.icons.filled.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -192,6 +193,19 @@ class MainActivity : ComponentActivity() {
                         TopAppBar(
                             title = { Text("SpendTrack") },
                             actions = {
+                                IconButton(
+                                    onClick = {
+                                        navController.navigate(Routes.SETTINGS) {
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = "Configurações"
+                                    )
+                                }
+
                                 IconButton(
                                     onClick = {
                                         Firebase.auth.signOut()

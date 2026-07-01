@@ -1,12 +1,17 @@
 package com.example.spendtrackapp.ui
 
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +34,7 @@ fun HomePage(
     } else {
         0f
     }
+
 
     Column(
         modifier = modifier
@@ -65,6 +71,7 @@ fun HomePage(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+
         val remainingText = if (remaining >= 0.0) {
             "Restante: R$ %.2f".format(remaining)
         } else {
@@ -75,6 +82,7 @@ fun HomePage(
             text = remainingText,
             fontSize = 18.sp
         )
+
 
         Spacer(modifier = Modifier.height(16.dp))
 

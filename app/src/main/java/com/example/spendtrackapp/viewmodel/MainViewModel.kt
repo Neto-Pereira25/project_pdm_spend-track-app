@@ -20,7 +20,6 @@ class MainViewModel(
 
     private val _expenses = mutableStateListOf<Expense>()
     private var _monthlyGoal = androidx.compose.runtime.mutableStateOf(0.0)
-
     val expenses: List<Expense>
         get() = _expenses.toList()
 
@@ -111,14 +110,18 @@ class MainViewModel(
 
     override fun onExpenseRemoved(expense: FBExpense) {
         val converted = expense.toExpense()
+
         Log.d(TAG, "Snapshot removed expense received: $converted")
+
         _expenses.removeAll { it.id == converted.id }
     }
 
     override fun onUserSignOut() {
         Log.d(TAG, "Auth sign-out detected, clearing local expenses list")
+
         _expenses.clear()
         _monthlyGoal.value = 0.0
+
     }
 
     override fun onSettingsLoaded(settings: FBSettings) {

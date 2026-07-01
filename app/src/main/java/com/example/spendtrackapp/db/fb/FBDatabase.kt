@@ -13,6 +13,7 @@ class FBDatabase {
         private const val TAG = "SpendTrackFirestore"
     }
 
+
     interface Listener {
         fun onExpenseAdded(expense: FBExpense)
         fun onExpenseUpdated(expense: FBExpense)
@@ -20,6 +21,7 @@ class FBDatabase {
         fun onSettingsLoaded(settings: FBSettings)
         fun onUserSignOut()
     }
+
 
     private val auth = Firebase.auth
     private val db = Firebase.firestore
@@ -75,7 +77,6 @@ class FBDatabase {
                         }
                     }
                 }
-
             settingsReg = refCurrUser
                 .collection("settings")
                 .document("main")
