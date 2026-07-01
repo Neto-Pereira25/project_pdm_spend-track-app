@@ -25,6 +25,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 
+import android.widget.Toast
+import androidx.activity.compose.LocalActivity
+
 @Composable
 fun ExpenseDialog(
     onDismiss: () -> Unit,
@@ -33,6 +36,7 @@ fun ExpenseDialog(
     val description = remember { mutableStateOf("") }
     val amount = remember { mutableStateOf("") }
     val category = remember { mutableStateOf("") }
+    val activity = LocalActivity.current
 
     Dialog(onDismissRequest = { onDismiss() }) {
         Surface {
@@ -82,18 +86,27 @@ fun ExpenseDialog(
 
                 Button(
                     onClick = {
-                        val expenseAmount = amount.value.toDoubleOrNull()
+                        val expenseAmount = amount.value.replace(",", ".").toDoubleOrNull()
+
                         if (
                             description.value.isNotBlank() &&
                             category.value.isNotBlank() &&
-                            expenseAmount != null
+                            expenseAmount != null &&
+                            expenseAmount > 0.0
                         ) {
                             onConfirm(
-                                description.value,
+                                description.value.trim(),
                                 expenseAmount,
-                                category.value
+                                category.value.trim()
                             )
+                        } else {
+                            Toast.makeText(
+                                activity,
+                                "Preencha uma descrição, categoria e valor válido.",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
+
                     },
                     modifier = Modifier
                         .fillMaxWidth()
