@@ -14,6 +14,8 @@ fun ListPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     onExpenseClick: (String) -> Unit
+    viewModel: MainViewModel,
+    onExpenseClick: (String) -> Unit
 ) {
     val expenseList = viewModel.expenses
 
@@ -26,6 +28,7 @@ fun ListPage(
             ExpenseItem(
                 expense = expense,
                 onClick = {
+                    onExpenseClick(expense.id)
                     onExpenseClick(expense.id)
                 },
                 onClose = {

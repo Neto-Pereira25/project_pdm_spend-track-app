@@ -4,8 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.spendtrackapp.ui.ExpenseDetailsPage
+import com.example.spendtrackapp.ui.GoalsPage
 import androidx.navigation.navArgument
 import com.example.spendtrackapp.ui.ExpenseDetailsPage
 import com.example.spendtrackapp.ui.GoalsPage
@@ -36,6 +40,10 @@ fun MainNavHost(
         composable(Routes.LIST) {
             ListPage(
                 modifier = modifier,
+                viewModel = viewModel,
+                onExpenseClick = { expenseId ->
+                    navController.navigate("${Routes.DETAIL}/$expenseId")
+                }
                 viewModel = viewModel,
                 onExpenseClick = { expenseId ->
                     navController.navigate("${Routes.DETAIL}/$expenseId")
