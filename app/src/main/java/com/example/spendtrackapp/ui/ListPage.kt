@@ -14,8 +14,6 @@ fun ListPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     onExpenseClick: (String) -> Unit
-    viewModel: MainViewModel,
-    onExpenseClick: (String) -> Unit
 ) {
     val expenseList = viewModel.expenses
 

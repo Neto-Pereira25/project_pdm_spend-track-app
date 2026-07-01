@@ -42,14 +42,11 @@ fun HomePage(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
-        horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = "Dashboard",
             fontSize = 24.sp
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -82,7 +79,6 @@ fun HomePage(
         }
 
         Text(
-            text = remainingText,
             text = remainingText,
             fontSize = 18.sp
         )

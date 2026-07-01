@@ -9,7 +9,6 @@ import com.example.spendtrackapp.db.fb.toFBExpense
 import com.example.spendtrackapp.model.Expense
 import android.util.Log
 import com.example.spendtrackapp.db.fb.FBSettings
-import com.example.spendtrackapp.db.fb.FBSettings
 
 class MainViewModel(
     private val db: FBDatabase
@@ -21,13 +20,8 @@ class MainViewModel(
 
     private val _expenses = mutableStateListOf<Expense>()
     private var _monthlyGoal = androidx.compose.runtime.mutableStateOf(0.0)
-    private var _monthlyGoal = androidx.compose.runtime.mutableStateOf(0.0)
-
     val expenses: List<Expense>
         get() = _expenses.toList()
-
-    val monthlyGoal: Double
-        get() = _monthlyGoal.value
 
     val monthlyGoal: Double
         get() = _monthlyGoal.value
@@ -79,22 +73,6 @@ class MainViewModel(
 
     fun totalItems(): Int {
         return _expenses.size
-    }
-
-    fun findById(id: String): Expense? {
-        return _expenses.find { it.id == id }
-    }
-
-    fun saveMonthlyGoal(
-        monthlyGoal: Double,
-        onSuccess: (() -> Unit)? = null,
-        onFailure: ((Exception) -> Unit)? = null
-    ) {
-        db.saveMonthlyGoal(
-            monthlyGoal = monthlyGoal,
-            onSuccess = onSuccess,
-            onFailure = onFailure
-        )
     }
 
     fun findById(id: String): Expense? {
