@@ -12,9 +12,8 @@ import com.example.spendtrackapp.ui.GoalsPage
 import com.example.spendtrackapp.ui.HomePage
 import com.example.spendtrackapp.ui.ListPage
 import com.example.spendtrackapp.ui.MapPage
-import com.example.spendtrackapp.viewmodel.MainViewModel
-import com.example.spendtrackapp.ui.GoalsPage
 import com.example.spendtrackapp.ui.SettingsPage
+import com.example.spendtrackapp.viewmodel.MainViewModel
 
 @Composable
 fun MainNavHost(

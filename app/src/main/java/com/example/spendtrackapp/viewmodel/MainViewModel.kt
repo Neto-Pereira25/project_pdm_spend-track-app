@@ -20,7 +20,6 @@ class MainViewModel(
 
     private val _expenses = mutableStateListOf<Expense>()
     private var _monthlyGoal = androidx.compose.runtime.mutableStateOf(0.0)
-
     val expenses: List<Expense>
         get() = _expenses.toList()
 
@@ -183,4 +182,3 @@ class MainViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-
