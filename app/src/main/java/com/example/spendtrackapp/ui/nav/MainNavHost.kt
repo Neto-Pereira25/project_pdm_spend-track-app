@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.spendtrackapp.ui.ExpenseDetailsPage
+import com.example.spendtrackapp.ui.GoalsPage
 import com.example.spendtrackapp.ui.HomePage
 import com.example.spendtrackapp.ui.ListPage
 import com.example.spendtrackapp.ui.MapPage
@@ -42,6 +43,13 @@ fun MainNavHost(
 
         composable(Routes.MAP) {
             MapPage(
+                modifier = modifier,
+                viewModel = viewModel
+            )
+        }
+
+        composable(Routes.GOALS) {
+            GoalsPage(
                 modifier = modifier,
                 viewModel = viewModel
             )

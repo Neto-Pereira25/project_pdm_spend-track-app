@@ -209,7 +209,8 @@ class MainActivity : ComponentActivity() {
                         val items = listOf(
                             BottomNavItem.Home,
                             BottomNavItem.List,
-                            BottomNavItem.Map
+                            BottomNavItem.Map,
+                            BottomNavItem.Goals
                         )
 
                         BottomNavBar(
