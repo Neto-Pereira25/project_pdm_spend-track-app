@@ -1,6 +1,5 @@
 package com.example.spendtrackapp.ui.nav
 
-
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem

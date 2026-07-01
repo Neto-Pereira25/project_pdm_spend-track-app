@@ -72,6 +72,10 @@ class MainViewModel(
         return _expenses.size
     }
 
+    fun findById(id: String): Expense? {
+        return _expenses.find { it.id == id }
+    }
+
     override fun onExpenseAdded(expense: FBExpense) {
         val converted = expense.toExpense()
         Log.d(TAG, "Snapshot added expense received: $converted")
@@ -112,4 +116,3 @@ class MainViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-
