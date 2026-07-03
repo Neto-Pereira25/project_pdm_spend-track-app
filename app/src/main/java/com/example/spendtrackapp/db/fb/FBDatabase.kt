@@ -1,6 +1,7 @@
 package com.example.spendtrackapp.db.fb
 
 import android.util.Log
+import android.util.Log.e
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentChange
@@ -9,74 +10,75 @@ import com.google.firebase.firestore.firestore
 
 class FBDatabase {
 
-    companion object {
-        private const val TAG = "SpendTrackFirestore"
-    }
-
-
     interface Listener {
         fun onExpenseAdded(expense: FBExpense)
         fun onExpenseUpdated(expense: FBExpense)
         fun onExpenseRemoved(expense: FBExpense)
+
+        fun onPublicPriceEntryAdded(entry: FBPublicPriceEntry)
+        fun onPublicPriceEntryUpdated(entry: FBPublicPriceEntry)
+        fun onPublicPriceEntryRemoved(entry: FBPublicPriceEntry)
+
         fun onSettingsLoaded(settings: FBSettings)
         fun onUserSignOut()
     }
-
 
     private val auth = Firebase.auth
     private val db = Firebase.firestore
 
     private var expensesListReg: ListenerRegistration? = null
     private var settingsReg: ListenerRegistration? = null
+    private var publicPriceEntriesReg: ListenerRegistration? = null
+
     private var listener: Listener? = null
 
     init {
         auth.addAuthStateListener { auth ->
-            Log.d(TAG, "Auth state changed. currentUser=${auth.currentUser?.uid}")
 
             if (auth.currentUser == null) {
-                Log.d(TAG, "No authenticated user. Removing expense listener if present")
-
                 expensesListReg?.remove()
                 settingsReg?.remove()
+                publicPriceEntriesReg?.remove()
+
+                expensesListReg = null
+                settingsReg = null
+                publicPriceEntriesReg = null
+
                 listener?.onUserSignOut()
                 return@addAuthStateListener
             }
 
-            val refCurrUser = db.collection("users").document(auth.currentUser!!.uid)
-            Log.d(TAG, "Attaching expenses snapshot listener to ${refCurrUser.path}/expenses")
+            val uid = auth.currentUser!!.uid
+            val refCurrUser = db.collection("users").document(uid)
+
+            expensesListReg?.remove()
+            settingsReg?.remove()
+            publicPriceEntriesReg?.remove()
 
             expensesListReg = refCurrUser
                 .collection("expenses")
                 .addSnapshotListener { snapshots, ex ->
-                    if (ex != null) {
-                        return@addSnapshotListener
-                    }
-
-                    if (snapshots == null) {
-                        Log.d(TAG, "Expense snapshot returned null for user ${auth.currentUser!!.uid}")
-                        return@addSnapshotListener
-                    }
-
-                    Log.d(TAG, "Received ${snapshots.documentChanges.size} expense change(s) for user ${auth.currentUser!!.uid}")
+                    if (ex != null) return@addSnapshotListener
 
                     snapshots?.documentChanges?.forEach { change ->
                         val fbExpense = change.document.toObject(FBExpense::class.java)
 
-                        Log.d(
-                            TAG,
-                            "Expense snapshot change=${change.type} id=${fbExpense.id} path=${change.document.reference.path}"
-                        )
+                        when (change.type) {
+                            DocumentChange.Type.ADDED -> {
+                                listener?.onExpenseAdded(fbExpense)
+                            }
 
-                        if (change.type == DocumentChange.Type.ADDED) {
-                            listener?.onExpenseAdded(fbExpense)
-                        } else if (change.type == DocumentChange.Type.MODIFIED) {
-                            listener?.onExpenseUpdated(fbExpense)
-                        } else if (change.type == DocumentChange.Type.REMOVED) {
-                            listener?.onExpenseRemoved(fbExpense)
+                            DocumentChange.Type.MODIFIED -> {
+                                listener?.onExpenseUpdated(fbExpense)
+                            }
+
+                            DocumentChange.Type.REMOVED -> {
+                                listener?.onExpenseRemoved(fbExpense)
+                            }
                         }
                     }
                 }
+
             settingsReg = refCurrUser
                 .collection("settings")
                 .document("main")
@@ -85,6 +87,30 @@ class FBDatabase {
 
                     snapshot?.toObject(FBSettings::class.java)?.let { settings ->
                         listener?.onSettingsLoaded(settings)
+                    }
+                }
+
+            publicPriceEntriesReg = db
+                .collection("public_price_entries")
+                .addSnapshotListener { snapshots, ex ->
+                    if (ex != null) return@addSnapshotListener
+
+                    snapshots?.documentChanges?.forEach { change ->
+                        val entry = change.document.toObject(FBPublicPriceEntry::class.java)
+
+                        when (change.type) {
+                            DocumentChange.Type.ADDED -> {
+                                listener?.onPublicPriceEntryAdded(entry)
+                            }
+
+                            DocumentChange.Type.MODIFIED -> {
+                                listener?.onPublicPriceEntryUpdated(entry)
+                            }
+
+                            DocumentChange.Type.REMOVED -> {
+                                listener?.onPublicPriceEntryRemoved(entry)
+                            }
+                        }
                     }
                 }
         }
@@ -104,6 +130,7 @@ class FBDatabase {
             throw RuntimeException("User not logged in!")
 
         val uid = auth.currentUser!!.uid
+
         val fbUser = FBUser().apply {
             this.name = name
             this.email = email
@@ -112,7 +139,9 @@ class FBDatabase {
         db.collection("users")
             .document(uid)
             .set(fbUser)
-            .addOnSuccessListener { onSuccess?.invoke() }
+            .addOnSuccessListener {
+                onSuccess?.invoke()
+            }
             .addOnFailureListener { ex ->
                 onFailure?.invoke(ex)
             }
@@ -130,24 +159,43 @@ class FBDatabase {
             throw RuntimeException("Expense with null or empty id!")
 
         val uid = auth.currentUser!!.uid
-        val documentRef = db.collection("users")
+        val privateExpenseId = expense.id!!
+        val publicEntryId = "${uid}_$privateExpenseId"
+
+        val privateExpenseRef = db.collection("users")
             .document(uid)
             .collection("expenses")
-            .document(expense.id!!)
+            .document(privateExpenseId)
 
-        Log.d(
-            TAG,
-            "Saving expense for uid=$uid at path=${documentRef.path} payload=id=${expense.id}, description=${expense.description}, amount=${expense.amount}, category=${expense.category}"
-        )
-
-        documentRef
+        privateExpenseRef
             .set(expense)
             .addOnSuccessListener {
-                Log.d(TAG, "Expense saved successfully at ${documentRef.path}")
-                onSuccess?.invoke()
+
+                if (expense.lat != null && expense.lng != null) {
+                    val publicEntry = FBPublicPriceEntry().apply {
+                        id = publicEntryId
+                        this.privateExpenseId = privateExpenseId
+                        amount = expense.amount
+                        category = expense.category
+                        lat = expense.lat
+                        lng = expense.lng
+                        ownerUid = uid
+                    }
+
+                    db.collection("public_price_entries")
+                        .document(publicEntryId)
+                        .set(publicEntry)
+                        .addOnSuccessListener {
+                            onSuccess?.invoke()
+                        }
+                        .addOnFailureListener { ex ->
+                            onFailure?.invoke(ex)
+                        }
+                } else {
+                    onSuccess?.invoke()
+                }
             }
             .addOnFailureListener { ex ->
-                Log.e(TAG, "Expense save failed at ${documentRef.path}", ex)
                 onFailure?.invoke(ex)
             }
     }
@@ -164,21 +212,26 @@ class FBDatabase {
             throw RuntimeException("Expense with null or empty id!")
 
         val uid = auth.currentUser!!.uid
-        val documentRef = db.collection("users")
+        val privateExpenseId = expense.id!!
+        val publicEntryId = "${uid}_$privateExpenseId"
+
+        db.collection("users")
             .document(uid)
             .collection("expenses")
-            .document(expense.id!!)
-
-        Log.d(TAG, "Removing expense for uid=$uid at path=${documentRef.path}")
-
-        documentRef
+            .document(privateExpenseId)
             .delete()
             .addOnSuccessListener {
-                Log.d(TAG, "Expense removed successfully at ${documentRef.path}")
-                onSuccess?.invoke()
+                db.collection("public_price_entries")
+                    .document(publicEntryId)
+                    .delete()
+                    .addOnSuccessListener {
+                        onSuccess?.invoke()
+                    }
+                    .addOnFailureListener { ex ->
+                        onFailure?.invoke(ex)
+                    }
             }
             .addOnFailureListener { ex ->
-                Log.e(TAG, "Expense remove failed at ${documentRef.path}", ex)
                 onFailure?.invoke(ex)
             }
     }
@@ -202,7 +255,11 @@ class FBDatabase {
             .collection("settings")
             .document("main")
             .set(settings)
-            .addOnSuccessListener { onSuccess?.invoke() }
-            .addOnFailureListener { ex -> onFailure?.invoke(ex) }
+            .addOnSuccessListener {
+                onSuccess?.invoke()
+            }
+            .addOnFailureListener { ex ->
+                onFailure?.invoke(ex)
+            }
     }
 }

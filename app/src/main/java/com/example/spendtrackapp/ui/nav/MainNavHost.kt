@@ -13,13 +13,16 @@ import com.example.spendtrackapp.ui.HomePage
 import com.example.spendtrackapp.ui.ListPage
 import com.example.spendtrackapp.ui.MapPage
 import com.example.spendtrackapp.ui.SettingsPage
+import com.example.spendtrackapp.ui.SettingsPage
 import com.example.spendtrackapp.viewmodel.MainViewModel
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun MainNavHost(
     navController: NavHostController,
     viewModel: MainViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMapClick: (LatLng) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -45,7 +48,8 @@ fun MainNavHost(
         composable(Routes.MAP) {
             MapPage(
                 modifier = modifier,
-                viewModel = viewModel
+                viewModel = viewModel,
+                onMapClick = onMapClick
             )
         }
 
@@ -65,11 +69,17 @@ fun MainNavHost(
         composable(
             route = "${Routes.DETAIL}/{expenseId}",
             arguments = listOf(
-                navArgument("expenseId") { type = NavType.StringType }
+                navArgument("expenseId") {
+                    type = NavType.StringType
+                }
             )
         ) { backStackEntry ->
             val expenseId = backStackEntry.arguments?.getString("expenseId")
-            val expense = if (expenseId != null) viewModel.findById(expenseId) else null
+            val expense = if (expenseId != null) {
+                viewModel.findById(expenseId)
+            } else {
+                null
+            }
 
             ExpenseDetailsPage(
                 expense = expense,
