@@ -75,6 +75,7 @@ class MainActivity : ComponentActivity() {
             var showDialog by remember { mutableStateOf(false) }
             var selectedMapLat by remember { mutableStateOf<Double?>(null) }
             var selectedMapLng by remember { mutableStateOf<Double?>(null) }
+            var expenseIdWaitingLocationUpdate by remember { mutableStateOf<String?>(null) }
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             val showFab = currentDestination?.hierarchy?.any {
@@ -268,9 +269,57 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             viewModel = viewModel,
                             onMapClick = { latLng ->
-                                selectedMapLat = latLng.latitude
-                                selectedMapLng = latLng.longitude
-                                showDialog = true
+
+                                val expenseIdToUpdate = expenseIdWaitingLocationUpdate
+
+                                if (expenseIdToUpdate != null) {
+                                    val expenseToUpdate = viewModel.findById(expenseIdToUpdate)
+
+                                    if (expenseToUpdate != null) {
+                                        viewModel.updateLocation(
+                                            expense = expenseToUpdate,
+                                            lat = latLng.latitude,
+                                            lng = latLng.longitude,
+                                            onSuccess = {
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Localização do gasto atualizada com sucesso",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+
+                                                expenseIdWaitingLocationUpdate = null
+                                            },
+                                            onFailure = { ex ->
+                                                Toast.makeText(
+                                                    this@MainActivity,
+                                                    "Erro ao atualizar localização: ${ex.message}",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        )
+                                    } else {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Gasto não encontrado para atualizar localização",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+
+                                        expenseIdWaitingLocationUpdate = null
+                                    }
+                                } else {
+                                    selectedMapLat = latLng.latitude
+                                    selectedMapLng = latLng.longitude
+                                    showDialog = true
+                                }
+                            },
+                            onChangeExpenseLocation = { expense ->
+                                expenseIdWaitingLocationUpdate = expense.id
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Toque no mapa para definir a nova localização do gasto",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         )
                     }

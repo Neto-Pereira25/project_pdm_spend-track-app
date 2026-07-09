@@ -26,6 +26,7 @@ fun ExpenseDetailsPage(
     expense: Expense?,
     onDelete: () -> Unit,
     onUpdate: (description: String, amount: Double, category: String) -> Unit,
+    onChangeLocation: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showEditDialog by remember {
@@ -122,6 +123,17 @@ fun ExpenseDetailsPage(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Editar gasto")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = {
+                onChangeLocation(expense)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Alterar localização no mapa")
         }
 
         Spacer(modifier = Modifier.height(12.dp))

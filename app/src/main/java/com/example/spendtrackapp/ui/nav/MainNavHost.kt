@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.spendtrackapp.model.Expense
 import com.example.spendtrackapp.ui.ExpenseDetailsPage
 import com.example.spendtrackapp.ui.GoalsPage
 import com.example.spendtrackapp.ui.HomePage
@@ -18,12 +19,14 @@ import com.example.spendtrackapp.ui.SettingsPage
 import com.example.spendtrackapp.viewmodel.MainViewModel
 import com.google.android.gms.maps.model.LatLng
 
+
 @Composable
 fun MainNavHost(
     navController: NavHostController,
     viewModel: MainViewModel,
     modifier: Modifier = Modifier,
-    onMapClick: (LatLng) -> Unit
+    onMapClick: (LatLng) -> Unit,
+    onChangeExpenseLocation: (Expense) -> Unit
 ) {
     val activity = LocalActivity.current
 
@@ -132,6 +135,12 @@ fun MainNavHost(
                                 ).show()
                             }
                         )
+                    }
+                },
+                onChangeLocation = { selectedExpense ->
+                    onChangeExpenseLocation(selectedExpense)
+                    navController.navigate(Routes.MAP) {
+                        launchSingleTop = true
                     }
                 },
                 modifier = modifier
