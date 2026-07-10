@@ -61,6 +61,46 @@ class MainViewModel(
         )
     }
 
+    fun update(
+        expense: Expense,
+        description: String,
+        amount: Double,
+        category: String,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        val updatedExpense = expense.copy(
+            description = description,
+            amount = amount,
+            category = category
+        )
+
+        db.update(
+            expense = updatedExpense.toFBExpense(),
+            onSuccess = onSuccess,
+            onFailure = onFailure
+        )
+    }
+
+    fun updateLocation(
+        expense: Expense,
+        lat: Double,
+        lng: Double,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        val updatedExpense = expense.copy(
+            lat = lat,
+            lng = lng
+        )
+
+        db.update(
+            expense = updatedExpense.toFBExpense(),
+            onSuccess = onSuccess,
+            onFailure = onFailure
+        )
+    }
+
     fun remove(
         expense: Expense,
         onSuccess: (() -> Unit)? = null,
