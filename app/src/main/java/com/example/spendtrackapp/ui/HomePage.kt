@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -39,8 +41,9 @@ fun HomePage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
         Text(
@@ -97,5 +100,75 @@ fun HomePage(
             message = viewModel.goalStatusMessage(),
             level = viewModel.goalStatusLevel()
         )
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
+
+        Text(
+            text = "Análise de gastos",
+            fontSize = 22.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Text(
+            text = "Categorias cadastradas: ${viewModel.totalCategories()}",
+            fontSize = 18.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        Text(
+            text = "Ticket médio: R$ %.2f".format(
+                viewModel.averageExpenseValue()
+            ),
+            fontSize = 18.sp
+        )
+
+        viewModel.topCategory()?.let { (category, amount) ->
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = "Categoria com maior gasto",
+                fontSize = 20.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = category,
+                fontSize = 18.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "R$ %.2f".format(amount),
+                fontSize = 18.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "%.1f%% dos gastos".format(
+                    viewModel.topCategoryPercentage()
+                ),
+                fontSize = 16.sp
+            )
+        }
     }
 }
