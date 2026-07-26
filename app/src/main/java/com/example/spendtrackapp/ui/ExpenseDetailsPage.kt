@@ -10,16 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.spendtrackapp.model.Expense
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.spendtrackapp.model.Expense
 
 @Composable
 fun ExpenseDetailsPage(
@@ -27,6 +25,7 @@ fun ExpenseDetailsPage(
     onDelete: () -> Unit,
     onUpdate: (description: String, amount: Double, category: String) -> Unit,
     onChangeLocation: (Expense) -> Unit,
+    onViewLocation: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showEditDialog by remember {
@@ -107,6 +106,17 @@ fun ExpenseDetailsPage(
                 ),
                 fontSize = 16.sp
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    onViewLocation(expense)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver localização no mapa")
+            }
         } else {
             Text(
                 text = "Localização: não disponível",

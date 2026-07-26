@@ -27,7 +27,10 @@ fun MainNavHost(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier,
     onMapClick: (LatLng) -> Unit,
-    onChangeExpenseLocation: (Expense) -> Unit
+    onChangeExpenseLocation: (Expense) -> Unit,
+    onViewExpenseLocation: (Expense) -> Unit,
+    focusedLat: Double?,
+    focusedLng: Double?
 ) {
     val activity = LocalActivity.current
 
@@ -56,7 +59,9 @@ fun MainNavHost(
             MapPage(
                 modifier = modifier,
                 viewModel = viewModel,
-                onMapClick = onMapClick
+                onMapClick = onMapClick,
+                focusedLat = focusedLat,
+                focusedLng = focusedLng
             )
         }
 
@@ -140,6 +145,13 @@ fun MainNavHost(
                 },
                 onChangeLocation = { selectedExpense ->
                     onChangeExpenseLocation(selectedExpense)
+                    navController.navigate(Routes.MAP) {
+                        launchSingleTop = true
+                    }
+                },
+                onViewLocation = { selectedExpense ->
+                    onViewExpenseLocation(selectedExpense)
+
                     navController.navigate(Routes.MAP) {
                         launchSingleTop = true
                     }
