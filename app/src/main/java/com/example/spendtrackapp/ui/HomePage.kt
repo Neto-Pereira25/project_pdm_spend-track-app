@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.spendtrackapp.ui.components.CategoryBarChart
 import com.example.spendtrackapp.viewmodel.MainViewModel
 
 @Composable
@@ -28,73 +29,103 @@ fun HomePage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel
 ) {
-    val totalSpent = viewModel.totalSpent()
-    val monthlyGoal = viewModel.monthlyGoal
-    val remaining = monthlyGoal - totalSpent
-    val progress = if (monthlyGoal > 0.0) {
-        viewModel.goalUsagePercent().toFloat().coerceIn(0f, 1f)
-    } else {
-        0f
-    }
 
+    val totalSpent = viewModel.totalSpent()
+
+    val monthlyGoal = viewModel.monthlyGoal
+
+    val remaining = monthlyGoal - totalSpent
+
+    val progress =
+        if (monthlyGoal > 0.0) {
+            viewModel.goalUsagePercent()
+                .toFloat()
+                .coerceIn(0f, 1f)
+        } else {
+            0f
+        }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+
         Text(
             text = "Dashboard",
             fontSize = 24.sp
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         Text(
             text = "Total de gastos: ${viewModel.totalItems()}",
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Text(
-            text = "Total gasto: R$ %.2f".format(totalSpent),
+            text = "Total gasto: R$ %.2f".format(
+                totalSpent
+            ),
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Text(
-            text = "Meta mensal: R$ %.2f".format(monthlyGoal),
+            text = "Meta mensal: R$ %.2f".format(
+                monthlyGoal
+            ),
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
-
-        val remainingText = if (remaining >= 0.0) {
-            "Restante: R$ %.2f".format(remaining)
-        } else {
-            "Meta ultrapassada em: R$ %.2f".format(kotlin.math.abs(remaining))
-        }
+        val remainingText =
+            if (remaining >= 0.0) {
+                "Restante: R$ %.2f".format(
+                    remaining
+                )
+            } else {
+                "Meta ultrapassada em: R$ %.2f".format(
+                    kotlin.math.abs(
+                        remaining
+                    )
+                )
+            }
 
         Text(
             text = remainingText,
             fontSize = 18.sp
         )
 
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         GoalAlertCard(
             message = viewModel.goalStatusMessage(),
@@ -133,7 +164,7 @@ fun HomePage(
         viewModel.topCategory()?.let { (category, amount) ->
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(20.dp)
             )
 
             Text(
@@ -155,7 +186,9 @@ fun HomePage(
             )
 
             Text(
-                text = "R$ %.2f".format(amount),
+                text = "R$ %.2f".format(
+                    amount
+                ),
                 fontSize = 18.sp
             )
 
@@ -170,5 +203,26 @@ fun HomePage(
                 fontSize = 16.sp
             )
         }
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
+
+        Text(
+            text = "Distribuição por categoria",
+            fontSize = 22.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        CategoryBarChart(
+            categories = viewModel.expensesByCategory()
+        )
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
     }
 }

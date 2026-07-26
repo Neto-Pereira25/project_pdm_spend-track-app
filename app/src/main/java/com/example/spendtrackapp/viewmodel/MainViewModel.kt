@@ -297,6 +297,13 @@ class MainViewModel(
         return totalSpent() / expenses.size
     }
 
+    fun maxCategoryAmount(): Double {
+
+        return expensesByCategory()
+            .maxOfOrNull { it.value }
+            ?: 0.0
+    }
+
     private fun roundCoordinate(value: Double, precision: Int): Double {
         val factor = 10.0.pow(precision)
         return round(value * factor) / factor
