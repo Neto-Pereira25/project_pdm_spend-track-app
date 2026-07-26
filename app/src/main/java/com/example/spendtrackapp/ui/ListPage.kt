@@ -24,7 +24,6 @@ fun ListPage(
 ) {
     val expenseList = viewModel.expenses
 
-
     if (expenseList.isEmpty()) {
         Column(
             modifier = modifier
@@ -57,7 +56,6 @@ fun ListPage(
             ExpenseItem(
                 expense = expense,
                 onClick = {
-                    onExpenseClick(expense.id)
                     onExpenseClick(expense.id)
                 },
                 onClose = {
