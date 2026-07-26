@@ -1,6 +1,7 @@
 package com.example.spendtrackapp.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -18,11 +19,14 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun MapPage(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
-    onMapClick: (LatLng) -> Unit
+    onMapClick: (LatLng) -> Unit,
+    focusedLat: Double? = null,
+    focusedLng: Double? = null
 ) {
     val context = LocalContext.current
 
@@ -34,14 +38,35 @@ fun MapPage(
     val clusters = viewModel.collectivePriceClusters()
     val cameraPositionState = rememberCameraPositionState()
 
-    val firstCluster = clusters.firstOrNull()
+    LaunchedEffect(
+        focusedLat,
+        focusedLng
+    ) {
 
-    LaunchedEffect(firstCluster) {
-        if (firstCluster != null) {
-            val position = LatLng(firstCluster.lat, firstCluster.lng)
+        if (focusedLat != null && focusedLng != null) {
+
             cameraPositionState.move(
-                CameraUpdateFactory.newLatLngZoom(position, 15f)
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(focusedLat, focusedLng),
+                    18f
+                )
             )
+
+        } else {
+
+            val firstCluster = clusters.firstOrNull()
+
+            if (firstCluster != null) {
+                cameraPositionState.move(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            firstCluster.lat,
+                            firstCluster.lng
+                        ),
+                        15f
+                    )
+                )
+            }
         }
     }
 
@@ -59,6 +84,20 @@ fun MapPage(
             onMapClick(latLng)
         }
     ) {
+        if (focusedLat != null && focusedLng != null) {
+
+            Marker(
+                state = MarkerState(
+                    position = LatLng(
+                        focusedLat,
+                        focusedLng
+                    )
+                ),
+                title = "📍 Gasto selecionado",
+                snippet = "Localização deste gasto"
+            )
+        }
+
         clusters.forEach { cluster ->
             val position = LatLng(cluster.lat, cluster.lng)
 

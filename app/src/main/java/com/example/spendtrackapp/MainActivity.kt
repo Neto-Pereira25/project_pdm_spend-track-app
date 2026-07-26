@@ -76,6 +76,13 @@ class MainActivity : ComponentActivity() {
             var selectedMapLat by remember { mutableStateOf<Double?>(null) }
             var selectedMapLng by remember { mutableStateOf<Double?>(null) }
             var expenseIdWaitingLocationUpdate by remember { mutableStateOf<String?>(null) }
+            var focusedExpenseLat by remember {
+                mutableStateOf<Double?>(null)
+            }
+
+            var focusedExpenseLng by remember {
+                mutableStateOf<Double?>(null)
+            }
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             val showFab = currentDestination?.hierarchy?.any {
@@ -269,58 +276,60 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             viewModel = viewModel,
                             onMapClick = { latLng ->
+                                focusedExpenseLat = null
+                                focusedExpenseLng = null
 
                                 val expenseIdToUpdate = expenseIdWaitingLocationUpdate
 
                                 if (expenseIdToUpdate != null) {
-                                    val expenseToUpdate = viewModel.findById(expenseIdToUpdate)
+
+                                    val expenseToUpdate =
+                                        viewModel.findById(expenseIdToUpdate)
 
                                     if (expenseToUpdate != null) {
+
                                         viewModel.updateLocation(
                                             expense = expenseToUpdate,
                                             lat = latLng.latitude,
                                             lng = latLng.longitude,
                                             onSuccess = {
+
                                                 Toast.makeText(
                                                     this@MainActivity,
-                                                    "Localização do gasto atualizada com sucesso",
+                                                    "Localização atualizada",
                                                     Toast.LENGTH_LONG
                                                 ).show()
 
                                                 expenseIdWaitingLocationUpdate = null
-                                            },
-                                            onFailure = { ex ->
-                                                Toast.makeText(
-                                                    this@MainActivity,
-                                                    "Erro ao atualizar localização: ${ex.message}",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
                                             }
                                         )
-                                    } else {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Gasto não encontrado para atualizar localização",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-
-                                        expenseIdWaitingLocationUpdate = null
                                     }
+
                                 } else {
+
                                     selectedMapLat = latLng.latitude
                                     selectedMapLng = latLng.longitude
+
                                     showDialog = true
                                 }
                             },
+
                             onChangeExpenseLocation = { expense ->
+
                                 expenseIdWaitingLocationUpdate = expense.id
 
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "Toque no mapa para definir a nova localização do gasto",
+                                    "Toque no mapa para selecionar a nova localização",
                                     Toast.LENGTH_LONG
                                 ).show()
-                            }
+                            },
+                            onViewExpenseLocation = { expense ->
+                                focusedExpenseLat = expense.lat
+                                focusedExpenseLng = expense.lng
+                            },
+                            focusedLat = focusedExpenseLat,
+                            focusedLng = focusedExpenseLng
                         )
                     }
                 }

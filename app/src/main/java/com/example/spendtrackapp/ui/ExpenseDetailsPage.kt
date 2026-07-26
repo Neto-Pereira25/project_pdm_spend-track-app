@@ -7,19 +7,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.spendtrackapp.model.Expense
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.spendtrackapp.model.Expense
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun ExpenseDetailsPage(
@@ -27,8 +35,10 @@ fun ExpenseDetailsPage(
     onDelete: () -> Unit,
     onUpdate: (description: String, amount: Double, category: String) -> Unit,
     onChangeLocation: (Expense) -> Unit,
+    onViewLocation: (Expense) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     var showEditDialog by remember {
         mutableStateOf(false)
     }
@@ -59,7 +69,11 @@ fun ExpenseDetailsPage(
                 showEditDialog = false
             },
             onConfirm = { description, amount, category ->
-                onUpdate(description, amount, category)
+                onUpdate(
+                    description,
+                    amount,
+                    category
+                )
                 showEditDialog = false
             }
         )
@@ -68,53 +82,149 @@ fun ExpenseDetailsPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
+
         Text(
             text = "Detalhes do gasto",
             fontSize = 24.sp
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         Text(
             text = "Descrição: ${expense.description}",
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         Text(
             text = "Valor: R$ %.2f".format(expense.amount),
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         Text(
             text = "Categoria: ${expense.category}",
             fontSize = 18.sp
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         if (expense.lat != null && expense.lng != null) {
+
             Text(
-                text = "Localização: %.5f, %.5f".format(
+                text = "Localização",
+                fontSize = 18.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "%.5f, %.5f".format(
                     expense.lat,
                     expense.lng
                 ),
+                fontSize = 14.sp
+            )
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Text(
+                text = "Visualização da localização",
                 fontSize = 16.sp
             )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            val position = LatLng(
+                expense.lat,
+                expense.lng
+            )
+
+            val cameraPositionState =
+                rememberCameraPositionState()
+
+            val markerState = remember(position) {
+                MarkerState(position)
+            }
+
+            LaunchedEffect(position) {
+                cameraPositionState.move(
+                    CameraUpdateFactory.newLatLngZoom(
+                        position,
+                        16f
+                    )
+                )
+            }
+
+            GoogleMap(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                cameraPositionState = cameraPositionState,
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = false,
+                    scrollGesturesEnabled = false,
+                    zoomGesturesEnabled = false
+                )
+            ) {
+
+                Marker(
+                    state = markerState,
+                    title = expense.description,
+                    snippet = "R$ %.2f".format(
+                        expense.amount
+                    )
+                )
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+
+            Button(
+                onClick = {
+                    onViewLocation(expense)
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver localização no mapa")
+            }
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+
         } else {
+
             Text(
                 text = "Localização: não disponível",
                 fontSize = 16.sp
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+        }
 
         Button(
             onClick = {
@@ -125,7 +235,9 @@ fun ExpenseDetailsPage(
             Text("Editar gasto")
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         Button(
             onClick = {
@@ -136,7 +248,9 @@ fun ExpenseDetailsPage(
             Text("Alterar localização no mapa")
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         Button(
             onClick = onDelete,
@@ -144,5 +258,9 @@ fun ExpenseDetailsPage(
         ) {
             Text("Excluir gasto")
         }
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
     }
 }
