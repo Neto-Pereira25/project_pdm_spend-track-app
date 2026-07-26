@@ -252,6 +252,58 @@ class MainViewModel(
         }
     }
 
+    fun expensesByCategory(): Map<String, Double> {
+
+        return expenses
+            .groupBy { it.category }
+            .mapValues { (_, expenses) ->
+                expenses.sumOf { it.amount }
+            }
+            .toList()
+            .sortedByDescending { it.second }
+            .toMap()
+    }
+
+    fun topCategory(): Pair<String, Double>? {
+
+        return expensesByCategory()
+            .maxByOrNull { it.value }
+            ?.toPair()
+    }
+
+    fun topCategoryPercentage(): Double {
+
+        val total = totalSpent()
+
+        if (total <= 0.0) {
+            return 0.0
+        }
+
+        val topAmount = topCategory()?.second ?: 0.0
+
+        return (topAmount / total) * 100
+    }
+
+    fun totalCategories(): Int {
+        return expensesByCategory().size
+    }
+
+    fun averageExpenseValue(): Double {
+
+        if (expenses.isEmpty()) {
+            return 0.0
+        }
+
+        return totalSpent() / expenses.size
+    }
+
+    fun maxCategoryAmount(): Double {
+
+        return expensesByCategory()
+            .maxOfOrNull { it.value }
+            ?: 0.0
+    }
+
     private fun roundCoordinate(value: Double, precision: Int): Double {
         val factor = 10.0.pow(precision)
         return round(value * factor) / factor
