@@ -28,6 +28,9 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.example.spendtrackapp.ui.components.InfoCard
+import com.example.spendtrackapp.ui.components.SectionTitle
+import com.example.spendtrackapp.ui.components.StatCard
 
 @Composable
 fun ExpenseDetailsPage(
@@ -87,36 +90,35 @@ fun ExpenseDetailsPage(
         verticalArrangement = Arrangement.Top
     ) {
 
-        Text(
-            text = "Detalhes do gasto",
-            fontSize = 24.sp
-        )
-
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
-
-        Text(
-            text = "Descrição: ${expense.description}",
-            fontSize = 18.sp
+        SectionTitle(
+            text = "Detalhes do gasto"
         )
 
         Spacer(
             modifier = Modifier.height(12.dp)
         )
 
-        Text(
-            text = "Valor: R$ %.2f".format(expense.amount),
-            fontSize = 18.sp
+        InfoCard(
+            title = "Descrição",
+            value = expense.description
         )
 
         Spacer(
             modifier = Modifier.height(12.dp)
         )
 
-        Text(
-            text = "Categoria: ${expense.category}",
-            fontSize = 18.sp
+        StatCard(
+            title = "Valor",
+            value = "R$ %.2f".format(expense.amount)
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        InfoCard(
+            title = "Categoria",
+            value = expense.category
         )
 
         Spacer(
@@ -125,9 +127,8 @@ fun ExpenseDetailsPage(
 
         if (expense.lat != null && expense.lng != null) {
 
-            Text(
-                text = "Localização",
-                fontSize = 18.sp
+            SectionTitle(
+                text = "Localização"
             )
 
             Spacer(
@@ -152,7 +153,7 @@ fun ExpenseDetailsPage(
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(12.dp)
             )
 
             val position = LatLng(
@@ -198,7 +199,7 @@ fun ExpenseDetailsPage(
             }
 
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(24.dp)
             )
 
             Button(
@@ -211,18 +212,18 @@ fun ExpenseDetailsPage(
             }
 
             Spacer(
-                modifier = Modifier.height(24.dp)
+                modifier = Modifier.height(12.dp)
             )
 
         } else {
 
-            Text(
-                text = "Localização: não disponível",
-                fontSize = 16.sp
+            InfoCard(
+                title = "Localização",
+                value = "Não disponível"
             )
 
             Spacer(
-                modifier = Modifier.height(24.dp)
+                modifier = Modifier.height(12.dp)
             )
         }
 
