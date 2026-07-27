@@ -33,35 +33,56 @@ fun ListPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Nenhum gasto registrado ainda.",
-                fontSize = 18.sp
+                text = "📊 Nenhum gasto registrado",
+                fontSize = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
 
             Text(
-                text = "Use o botão + para adicionar seu primeiro gasto.",
+                text = "Use o botão + para registrar seu primeiro gasto.",
                 fontSize = 14.sp
             )
         }
         return
     }
 
-    LazyColumn(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(horizontal = 8.dp)
     ) {
-        items(expenseList, key = { it.id }) { expense ->
-            ExpenseItem(
-                expense = expense,
-                onClick = {
-                    onExpenseClick(expense.id)
-                },
-                onClose = {
-                    viewModel.remove(expense)
-                }
-            )
+
+        Text(
+            text = "Histórico de gastos",
+            fontSize = 24.sp
+        )
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        LazyColumn(
+            modifier = Modifier.weight(1f)
+        ) {
+
+            items(
+                expenseList,
+                key = { it.id }
+            ) { expense ->
+
+                ExpenseItem(
+                    expense = expense,
+                    onClick = {
+                        onExpenseClick(expense.id)
+                    },
+                    onClose = {
+                        viewModel.remove(expense)
+                    }
+                )
+            }
         }
     }
 }
