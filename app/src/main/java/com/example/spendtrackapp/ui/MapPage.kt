@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
@@ -19,7 +20,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
 fun MapPage(
     modifier: Modifier = Modifier,
@@ -86,13 +86,26 @@ fun MapPage(
     ) {
         if (focusedLat != null && focusedLng != null) {
 
+            val focusedPosition = remember(
+                focusedLat,
+                focusedLng
+            ) {
+                LatLng(
+                    focusedLat,
+                    focusedLng
+                )
+            }
+
+            val focusedMarkerState = remember(
+                focusedPosition
+            ) {
+                MarkerState(
+                    position = focusedPosition
+                )
+            }
+
             Marker(
-                state = MarkerState(
-                    position = LatLng(
-                        focusedLat,
-                        focusedLng
-                    )
-                ),
+                state = focusedMarkerState,
                 title = "📍 Gasto selecionado",
                 snippet = "Localização deste gasto"
             )

@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
@@ -25,6 +27,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.spendtrackapp.viewmodel.MainViewModel
+import com.example.spendtrackapp.ui.components.SectionTitle
+import com.example.spendtrackapp.ui.components.StatCard
 
 @Composable
 fun GoalsPage(
@@ -56,13 +60,15 @@ fun GoalsPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Text(
-            text = "Metas",
-            fontSize = 24.sp
+        SectionTitle(
+            text = "Metas"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -112,21 +118,25 @@ fun GoalsPage(
             Text("Salvar meta")
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Text(
-            text = "Total gasto: R$ %.2f".format(totalSpent),
-            fontSize = 18.sp
+        StatCard(
+            title = "Total gasto",
+            value = "R$ %.2f".format(totalSpent)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Meta mensal: R$ %.2f".format(monthlyGoal),
-            fontSize = 18.sp
+        Spacer(
+            modifier = Modifier.height(12.dp)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        StatCard(
+            title = "Meta mensal",
+            value = "R$ %.2f".format(monthlyGoal)
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
 
         val remainingText = if (remaining >= 0.0) {
@@ -135,17 +145,20 @@ fun GoalsPage(
             "Meta ultrapassada em: R$ %.2f".format(kotlin.math.abs(remaining))
         }
 
-        Text(
-            text = remainingText,
-            fontSize = 18.sp
+        StatCard(
+            title = "Saldo disponível",
+            value = remainingText
         )
 
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(20.dp)
+        )
 
         LinearProgressIndicator(
             progress = { progress },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(12.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -153,6 +166,10 @@ fun GoalsPage(
         GoalAlertCard(
             message = viewModel.goalStatusMessage(),
             level = viewModel.goalStatusLevel()
+        )
+
+        Spacer(
+            modifier = Modifier.height(24.dp)
         )
     }
 }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -22,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.example.spendtrackapp.ui.components.SectionTitle
+import com.example.spendtrackapp.ui.components.InfoCard
 
 @Composable
 fun SettingsPage(
@@ -36,62 +40,34 @@ fun SettingsPage(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = "Configurações",
-            fontSize = 24.sp
+        SectionTitle(
+            text = "Configurações"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = "SpendTrack",
-            fontSize = 20.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Controle inteligente de gastos",
-            fontSize = 16.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Versão: 1.0",
-            fontSize = 16.sp
+        InfoCard(
+            title = "Aplicação",
+            value = "SpendTrack",
+            subtitle = "Controle inteligente de gastos • Versão 1.0"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Divider()
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Usuário",
-            fontSize = 20.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "E-mail: ${user?.email ?: "Não informado"}",
-            fontSize = 16.sp
+        InfoCard(
+            title = "Usuário", value = user?.email ?: "Não informado"
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Divider()
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Preferências",
-            fontSize = 20.sp
+        SectionTitle(
+            text = "Preferências"
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -99,42 +75,31 @@ fun SettingsPage(
         Text(text = "Modo escuro")
 
         Switch(
-            checked = darkModeChecked.value,
-            onCheckedChange = {
+            checked = darkModeChecked.value, onCheckedChange = {
                 darkModeChecked.value = it
                 Toast.makeText(
                     activity,
                     "Modo escuro será implementado em uma versão futura",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
-        )
+            })
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(text = "Alertas de limite")
 
         Switch(
-            checked = notificationsChecked.value,
-            onCheckedChange = {
+            checked = notificationsChecked.value, onCheckedChange = {
                 notificationsChecked.value = it
                 Toast.makeText(
-                    activity,
-                    "Configuração visual de alertas atualizada",
-                    Toast.LENGTH_SHORT
+                    activity, "Configuração visual de alertas atualizada", Toast.LENGTH_SHORT
                 ).show()
-            }
-        )
+            })
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Divider()
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Dados",
-            fontSize = 20.sp
+        SectionTitle(
+            text = "Dados"
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -146,8 +111,7 @@ fun SettingsPage(
                     "Exportação CSV será implementada em uma versão futura",
                     Toast.LENGTH_SHORT
                 ).show()
-            }
-        ) {
+            }) {
             Text("Exportar dados em CSV")
         }
 
@@ -156,8 +120,7 @@ fun SettingsPage(
         Button(
             onClick = {
                 Firebase.auth.signOut()
-            },
-            modifier = Modifier.fillMaxWidth()
+            }, modifier = Modifier.fillMaxWidth()
         ) {
             Text("Sair da conta")
         }

@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,47 +29,85 @@ fun ExpenseItem(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
+            .padding(
+                horizontal = 8.dp,
+                vertical = 6.dp
+            )
+            .clickable {
+                onClick()
+            }
     ) {
-        Icon(
-            imageVector = Icons.Default.MonetizationOn,
-            contentDescription = "Gasto"
-        )
 
-        Spacer(modifier = Modifier.size(12.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = expense.description,
-                fontSize = 20.sp
-            )
-            Text(
-                text = "Categoria: ${expense.category}",
-                fontSize = 14.sp
-            )
-            Text(
-                text = "Valor: R$ %.2f".format(expense.amount),
-                fontSize = 14.sp
+            Icon(
+                imageVector = Icons.Default.MonetizationOn,
+                contentDescription = "Gasto"
             )
 
-            if (expense.lat != null && expense.lng != null) {
+            Spacer(
+                modifier = Modifier.size(12.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+
                 Text(
-                    text = "Localização: %.4f, %.4f".format(expense.lat, expense.lng),
-                    fontSize = 12.sp
+                    text = expense.category.uppercase(),
+                    fontSize = 13.sp
+                )
+
+                Text(
+                    text = expense.description,
+                    fontSize = 20.sp
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                Text(
+                    text = "R$ %.2f".format(expense.amount),
+                    fontSize = 20.sp
+                )
+
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
+
+                if (expense.lat != null && expense.lng != null) {
+
+                    Text(
+                        text = "📍 Localização registrada",
+                        fontSize = 12.sp
+                    )
+
+                } else {
+
+                    Text(
+                        text = "Sem localização",
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = onClose
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Remover"
                 )
             }
-        }
-
-        IconButton(onClick = onClose) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Remover"
-            )
         }
     }
 }
